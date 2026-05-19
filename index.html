@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GADGET STUDIO — VK Post Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Geologica:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #EAF4FB;
+  --surface: #FFFFFF;
+  --surface2: #F0F7FC;
+  --surface3: #DFF0FA;
+  --border: #C8E1F0;
+  --accent: #1A8FE3;
+  --accent-dim: rgba(26,143,227,0.10);
+  --red: #E84545;
+  --green: #22C97A;
+  --blue: #1A8FE3;
+  --white: #0D2B45;
+  --dim: #7AAAC4;
+  --dim2: #B3D1E6;
+  --r: 16px;
+  --r-sm: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: linear-gradient(160deg, #EAF4FB 0%, #D6EEF9 40%, #E8F7FF 100%);
+  color: var(--white);
+  font-family: 'Geologica', sans-serif;
+  font-weight: 400;
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ═══ LAYOUT ═══════════════════════════════════════════ */
+.app { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 300px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px 20px;
+  display: flex; flex-direction: column; gap: 24px;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+.main { flex: 1; padding: 28px 28px 80px; overflow-x: hidden; }
+
+/* ═══ SIDEBAR ═══════════════════════════════════════════ */
+.logo-row {
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border);
+}
+.logo { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); }
+.logo-sub { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim); margin-top: 2px; }
+
+.sb-section { display: flex; flex-direction: column; gap: 10px; }
+.sb-label { font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--dim); margin-bottom: 2px; }
+
+.key-input {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  color: var(--white);
+  font-family: 'Geologica', sans-serif;
+  font-size: 12px;
+  width: 100%; outline: none;
+  transition: border-color .2s;
+}
+.key-input:focus { border-color: var(--accent); }
+.key-input::placeholder { color: var(--dim2); }
+.key-note { font-size: 10px; color: var(--dim); line-height: 1.6; }
+.key-note a { color: var(--blue); text-decoration: none; }
+
+.model-select {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 12px;
+  color: var(--white); font-family: 'Geologica', sans-serif; font-size: 12px;
+  width: 100%; outline: none; cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 12px center;
+}
+.model-select:focus { border-color: var(--accent); }
+
+.post-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pt-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 6px; text-align: center;
+  font-size: 10px; font-family: 'Geologica', sans-serif; letter-spacing: .5px;
+  color: var(--dim); cursor: pointer; transition: all .2s;
+}
+.pt-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+.sb-stats {
+  background: var(--surface2); border-radius: var(--r-sm);
+  padding: 12px; display: flex; flex-direction: column; gap: 8px;
+  margin-top: auto;
+}
+.stat-row { display: flex; justify-content: space-between; align-items: center; }
+.stat-label { font-size: 10px; color: var(--dim); }
+.stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--accent); }
+
+/* ═══ MAIN AREA ═══════════════════════════════════════════ */
+.main-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px;
+}
+.main-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 1px; }
+.main-title span { color: var(--accent); }
+
+/* ADD PRODUCT INPUT */
+.add-product-zone {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 20px;
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 24px;
+  transition: border-color .2s;
+}
+.add-product-zone:focus-within { border-color: var(--accent); }
+.product-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--white); font-family: 'Geologica', sans-serif; font-size: 15px;
+}
+.product-input::placeholder { color: var(--dim2); }
+.add-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--r-sm); padding: 11px 20px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 17px; letter-spacing: 2px;
+  cursor: pointer; transition: opacity .2s; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+}
+.add-btn:hover { opacity: .88; }
+.add-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+/* PRODUCTS GRID */
+.products-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px; margin-bottom: 28px;
+}
+
+/* PRODUCT CARD */
+.product-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); overflow: hidden;
+  animation: popIn .35s cubic-bezier(.22,1,.36,1) both;
+  position: relative;
+}
+@keyframes popIn { from { opacity:0; transform: scale(.92) translateY(10px); } to { opacity:1; transform: none; } }
+
+.card-img {
+  aspect-ratio: 1; background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.card-img img { width: 100%; height: 100%; object-fit: contain; }
+.card-img .loading-overlay {
+  position: absolute; inset: 0; background: var(--surface2);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 10px;
+}
+.card-img .step-label {
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim);
+}
+.card-img canvas { width: 100%; height: 100%; object-fit: contain; display: none; }
+
+.img-toggle {
+  position: absolute; bottom: 8px; right: 8px;
+  display: flex; gap: 4px;
+}
+.img-tog-btn {
+  background: rgba(255,255,255,.85); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px;
+  font-size: 9px; letter-spacing: 1px; color: var(--dim);
+  cursor: pointer; transition: all .2s;
+}
+.img-tog-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.card-remove {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(255,255,255,.9); border: 1px solid var(--border);
+  border-radius: 6px; width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 12px; color: var(--dim);
+  transition: all .2s;
+}
+.card-remove:hover { background: var(--red); color: #fff; border-color: var(--red); }
+
+.card-status {
+  position: absolute; top: 8px; left: 8px;
+  background: rgba(255,255,255,.9); border: 1px solid var(--border); border-radius: 6px; padding: 3px 8px;
+  font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.card-status.loading { color: var(--dim); }
+.card-status.done { color: var(--green); }
+.card-status.error { color: var(--red); }
+
+.card-body { padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.card-brand { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--dim); }
+.card-name { font-size: 13px; font-weight: 500; line-height: 1.35; }
+.card-price { font-family: 'Bebas Neue', sans-serif; font-size: 26px; color: var(--accent); letter-spacing: 1px; }
+.card-rating { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+.card-rating .stars { color: var(--accent); font-size: 10px; }
+
+.card-desc {
+  background: var(--surface2); border-radius: var(--r-sm); padding: 10px;
+  font-size: 11px; font-weight: 300; color: #aaa; line-height: 1.6;
+  min-height: 60px;
+}
+.card-desc.loading-text { color: var(--dim); font-style: italic; }
+
+.card-actions { display: flex; gap: 6px; padding: 0 14px 14px; }
+.card-act-btn {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 6px; text-align: center;
+  font-size: 10px; letter-spacing: .5px; color: var(--dim); cursor: pointer;
+  transition: all .2s;
+}
+.card-act-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* EMPTY STATE */
+.empty-state {
+  text-align: center; padding: 60px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 14px;
+}
+.empty-icon { font-size: 52px; opacity: .3; }
+.empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--dim); letter-spacing: 1px; }
+.empty-sub { font-size: 13px; color: var(--dim2); max-width: 320px; line-height: 1.6; }
+
+/* POST TEXT ZONE */
+.post-zone {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 24px;
+  display: none;
+}
+.post-zone.visible { display: block; animation: fadeUp .4s ease both; }
+.post-zone-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.post-zone-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 1px; }
+.post-actions { display: flex; gap: 8px; }
+.pa-btn {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 14px;
+  font-size: 11px; letter-spacing: 1px; color: var(--dim); cursor: pointer;
+  transition: all .2s;
+}
+.pa-btn:hover { border-color: var(--accent); color: var(--accent); }
+.pa-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 600; }
+.pa-btn.primary:hover { opacity: .85; color: #fff; }
+.pa-btn.copied { background: var(--green); color: #fff; border-color: var(--green); }
+
+.post-text {
+  background: var(--surface2); border-radius: var(--r-sm);
+  padding: 18px; font-size: 14px; font-weight: 300;
+  line-height: 1.8; color: var(--white);
+  min-height: 140px; white-space: pre-wrap;
+  position: relative;
+}
+.post-text-loader {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--dim);
+}
+
+/* GENERATE BUTTON */
+.generate-zone {
+  margin-top: 20px;
+  display: flex; gap: 10px; align-items: center;
+}
+.gen-btn {
+  background: var(--accent); color: #fff; border: none;
+  border-radius: var(--r-sm); padding: 13px 28px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px;
+  cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 10px;
+}
+.gen-btn:hover { opacity: .88; transform: translateY(-1px); }
+.gen-btn:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+.gen-note { font-size: 11px; color: var(--dim); line-height: 1.5; }
+
+/* ERROR TOAST */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--red); color: #fff; border-radius: 12px;
+  padding: 12px 20px; font-size: 13px;
+  transition: transform .3s cubic-bezier(.22,1,.36,1);
+  z-index: 999; white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* SPINNER */
+.spin { animation: spin .7s linear infinite; display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:none; } }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ═══ RESPONSIVE ═══════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; position: static; }
+  .main { padding: 16px 16px 60px; }
+  .products-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="logo-row">
+    <div>
+      <div class="logo">GADGET//</div>
+      <div class="logo-sub">VK Post Builder</div>
+    </div>
+  </div>
+
+  <!-- OpenRouter -->
+  <div class="sb-section">
+    <div class="sb-label">🤖 OpenRouter API Key</div>
+    <input class="key-input" id="orKey" type="password" placeholder="sk-or-v1-...">
+    <div class="key-note">
+      Бесплатно. Получить: <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a><br>
+      Используются бесплатные модели, лимит ~200 запросов/день.
+    </div>
+  </div>
+
+  <!-- Model -->
+  <div class="sb-section">
+    <div class="sb-label">🧠 Модель (бесплатные)</div>
+    <select class="model-select" id="modelSelect">
+      <option value="meta-llama/llama-4-maverick:free">Llama 4 Maverick (рекомендую)</option>
+      <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (быстрый)</option>
+      <option value="google/gemini-2.5-pro-exp-03-25:free">Gemini 2.5 Pro (умный)</option>
+      <option value="openrouter/free">Auto (любая свободная)</option>
+    </select>
+  </div>
+
+  <!-- BG Removal -->
+  <div class="sb-section">
+    <div class="sb-label">✂️ Удаление фона</div>
+    <select class="model-select" id="bgMode" onchange="updateBgMode()">
+      <option value="local">🖥 Локально (rembg — бесплатно ∞)</option>
+      <option value="aiengine">☁️ AI Engine API (100/мес бесплатно)</option>
+      <option value="canvas">⚡ Авто по цвету (без настройки)</option>
+    </select>
+
+    <div id="bgLocalNote" class="key-note">
+      Лучший вариант. Запусти локальный сервер:<br>
+      <code style="background:var(--surface3);padding:2px 6px;border-radius:4px;font-size:10px;display:inline-block;margin-top:4px">pip install rembg[cpu,cli]<br>rembg s</code><br>
+      Сервер запустится на <strong>localhost:7000</strong>. Скачай инструкцию ↓
+    </div>
+
+    <div id="bgAiEngineSection" style="display:none">
+      <input class="key-input" id="aiEngineKey" type="password" placeholder="aiengine API key...">
+      <div class="key-note" style="margin-top:6px">
+        100 бесплатных/мес. Получить: <a href="https://ai-engine.net" target="_blank">ai-engine.net</a> → Sign Up → API Keys
+      </div>
+    </div>
+  </div>
+
+  <!-- Post type -->
+  <div class="sb-section">
+    <div class="sb-label">📝 Формат поста</div>
+    <div class="post-type-grid">
+      <div class="pt-btn active" data-type="подборка" onclick="selectType(this)">Подборка</div>
+      <div class="pt-btn" data-type="обзор" onclick="selectType(this)">Разбор</div>
+      <div class="pt-btn" data-type="до N рублей" onclick="selectType(this)">До N руб.</div>
+      <div class="pt-btn" data-type="проблема→решение" onclick="selectType(this)">Проблема</div>
+    </div>
+  </div>
+
+  <!-- Budget (for "до N рублей") -->
+  <div class="sb-section" id="budgetSection" style="display:none">
+    <div class="sb-label">💰 Бюджет поста</div>
+    <input class="key-input" id="budgetInput" placeholder="2000" style="font-size:15px;">
+  </div>
+
+  <!-- Stats -->
+  <div class="sb-stats">
+    <div class="stat-row">
+      <span class="stat-label">Товаров добавлено</span>
+      <span class="stat-val" id="statProducts">0</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Готово к посту</span>
+      <span class="stat-val" id="statReady">0</span>
+    </div>
+    <div class="stat-row">
+      <span class="stat-label">Метод фона</span>
+      <span class="stat-val" id="statBg" style="font-size:12px;text-transform:uppercase;letter-spacing:1px">rembg</span>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══════════════════════════════════════════ -->
+<main class="main">
+
+  <div class="main-header">
+    <div>
+      <div style="font-size:10px;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:6px">Создание поста</div>
+      <div class="main-title">ТОВАРЫ <span>ДЛЯ VK</span></div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT -->
+  <div class="add-product-zone">
+    <span style="font-size:18px;opacity:.4">🔍</span>
+    <input class="product-input" id="articleInput" placeholder="Введи артикул Wildberries и нажми Enter..." type="number">
+    <button class="add-btn" id="addBtn" onclick="addProduct()">
+      <span>ДОБАВИТЬ</span>
+    </button>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="products-grid" id="productsGrid">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">Нет товаров</div>
+      <div class="empty-sub">Введи артикул WB выше — инструмент сам найдёт товар, уберёт фон и напишет описание.</div>
+    </div>
+  </div>
+
+  <!-- GENERATE POST TEXT -->
+  <div class="generate-zone" id="generateZone" style="display:none">
+    <button class="gen-btn" id="genBtn" onclick="generatePost()">
+      ⚡ СГЕНЕРИРОВАТЬ ПОСТ
+    </button>
+    <div class="gen-note">
+      Claude напишет текст для ВКонтакте<br>под все добавленные товары
+    </div>
+  </div>
+
+  <!-- POST TEXT -->
+  <div class="post-zone" id="postZone">
+    <div class="post-zone-header">
+      <div class="post-zone-title">ТЕКСТ ПОСТА</div>
+      <div class="post-actions">
+        <button class="pa-btn" onclick="generatePost()">↺ Перегенерировать</button>
+        <button class="pa-btn primary" id="copyPostBtn" onclick="copyPost()">КОПИРОВАТЬ</button>
+      </div>
+    </div>
+    <div class="post-text" id="postText"></div>
+  </div>
+
+</main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+let products = []; // { id, article, status, name, brand, price, rating, reviews, origUrl, nobgDataUrl, desc }
+let postType = 'подборка';
+let rbgCreditsUsed = 0;
+
+// ═══════════════════════════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════════════════════════
+function toast(msg, dur = 3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function selectType(btn) {
+  document.querySelectorAll('.pt-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  postType = btn.dataset.type;
+  document.getElementById('budgetSection').style.display = postType === 'до N рублей' ? 'block' : 'none';
+}
+
+function updateStats() {
+  const total = products.length;
+  const ready = products.filter(p => p.status === 'done').length;
+  document.getElementById('statProducts').textContent = total;
+  document.getElementById('statReady').textContent = ready;
+  document.getElementById('statBg').textContent = `${50 - rbgCreditsUsed}/50`;
+
+  const emptyEl = document.getElementById('emptyState');
+  emptyEl.style.display = total === 0 ? '' : 'none';
+
+  const genZone = document.getElementById('generateZone');
+  genZone.style.display = ready > 0 ? 'flex' : 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// WB IMAGE URL
+// ═══════════════════════════════════════════════════════════
+function wbImgUrl(article) {
+  const art = parseInt(article);
+  let basket;
+  if (art <= 143) basket = '01'; else if (art <= 287) basket = '02';
+  else if (art <= 431) basket = '03'; else if (art <= 719) basket = '04';
+  else if (art <= 1007) basket = '05'; else if (art <= 1061) basket = '06';
+  else if (art <= 1115) basket = '07'; else if (art <= 1169) basket = '08';
+  else if (art <= 1313) basket = '09'; else if (art <= 1601) basket = '10';
+  else if (art <= 1655) basket = '11'; else if (art <= 1919) basket = '12';
+  else if (art <= 2045) basket = '13'; else if (art <= 2189) basket = '14';
+  else if (art <= 2405) basket = '15'; else if (art <= 2621) basket = '16';
+  else if (art <= 2837) basket = '17'; else basket = '18';
+  const vol = Math.floor(art / 100000);
+  const part = Math.floor(art / 1000);
+  return `https://basket-${basket}.wbbasket.ru/vol${vol}/part${part}/${art}/images/big/1.webp`;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADD PRODUCT
+// ═══════════════════════════════════════════════════════════
+async function addProduct() {
+  const article = document.getElementById('articleInput').value.trim();
+  if (!article) return;
+
+  // Check duplicate
+  if (products.find(p => p.article === article)) {
+    toast('⚠️ Этот артикул уже добавлен');
+    return;
+  }
+
+  document.getElementById('addBtn').disabled = true;
+  document.getElementById('articleInput').value = '';
+
+  const id = Date.now();
+  const product = { id, article, status: 'loading', name: '', brand: '', price: null, rating: 0, reviews: 0, origUrl: null, nobgDataUrl: null, desc: '' };
+  products.push(product);
+  renderCard(product);
+  updateStats();
+
+  try {
+    // 1. Fetch WB data
+    updateCardStatus(id, 'loading', 'Поиск...');
+    const data = await fetchWB(article);
+    Object.assign(product, data);
+    updateCardMeta(id, product);
+
+    // 2. Load image
+    updateCardStatus(id, 'loading', 'Фото...');
+    const imgUrl = `https://images.weserv.nl/?url=${encodeURIComponent(wbImgUrl(article))}&output=png&w=600`;
+    product.origUrl = imgUrl;
+    await loadCardImage(id, imgUrl);
+
+    // 3. Remove background
+    updateCardStatus(id, 'loading', 'Вырезаем фон...');
+    await removeBackground(id, imgUrl, product);
+
+    // 4. Generate description
+    updateCardStatus(id, 'loading', 'Пишем описание...');
+    await generateDesc(id, product);
+
+    product.status = 'done';
+    updateCardStatus(id, 'done', '✓ Готово');
+
+  } catch (e) {
+    product.status = 'error';
+    updateCardStatus(id, 'error', '✗ Ошибка');
+    toast('❌ ' + e.message);
+  }
+
+  document.getElementById('addBtn').disabled = false;
+  updateStats();
+}
+
+// ═══════════════════════════════════════════════════════════
+// FETCH WB
+// ═══════════════════════════════════════════════════════════
+async function fetchWB(article) {
+  const url = `https://card.wb.ru/cards/v2/detail?appType=1&curr=rub&dest=-1257786&nm=${article}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`WB не ответил (${resp.status}). Проверь артикул.`);
+  const json = await resp.json();
+  const p = json?.data?.products?.[0];
+  if (!p) throw new Error('Товар не найден. Попробуй другой артикул.');
+  const priceData = p.sizes?.[0]?.price;
+  return {
+    name: p.name || 'Товар без названия',
+    brand: p.brand || '',
+    price: priceData ? Math.round(priceData.total / 100) : null,
+    rating: Math.round((p.reviewRating || 0) * 10) / 10,
+    reviews: p.feedbacks || 0,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════
+// BG MODE UI
+// ═══════════════════════════════════════════════════════════
+function updateBgMode() {
+  const mode = document.getElementById('bgMode').value;
+  document.getElementById('bgLocalNote').style.display = mode === 'local' ? 'block' : 'none';
+  document.getElementById('bgAiEngineSection').style.display = mode === 'aiengine' ? 'block' : 'none';
+  const labels = { local: 'rembg', aiengine: 'AI Engine', canvas: 'Авто' };
+  document.getElementById('statBg').textContent = labels[mode] || mode;
+  localStorage.setItem('bgMode', mode);
+}
+
+// ═══════════════════════════════════════════════════════════
+// REMOVE BACKGROUND — dispatcher
+// ═══════════════════════════════════════════════════════════
+async function removeBackground(id, imgUrl, product) {
+  const mode = document.getElementById('bgMode').value;
+
+  if (mode === 'local') {
+    await rembgLocal(id, imgUrl, product);
+  } else if (mode === 'aiengine') {
+    await aiEngineRemoveBg(id, imgUrl, product);
+  } else {
+    await canvasRemoveBg(id, imgUrl, product);
+  }
+}
+
+// ── LOCAL rembg server (rembg s → localhost:7000) ──────────
+async function rembgLocal(id, imgUrl, product) {
+  try {
+    // rembg server accepts URL via ?url= param
+    const rembgUrl = `http://localhost:7000?url=${encodeURIComponent(imgUrl)}`;
+    const resp = await fetch(rembgUrl, { mode: 'cors' });
+    if (!resp.ok) throw new Error(`rembg server: ${resp.status}`);
+    const blob = await resp.blob();
+    product.nobgDataUrl = await blobToDataUrl(blob);
+    showCardNobg(id, product.nobgDataUrl);
+  } catch (e) {
+    console.warn('rembg local failed, falling back to canvas:', e.message);
+    await canvasRemoveBg(id, imgUrl, product);
+  }
+}
+
+// ── AI Engine API ──────────────────────────────────────────
+async function aiEngineRemoveBg(id, imgUrl, product) {
+  const apiKey = document.getElementById('aiEngineKey').value.trim();
+  if (!apiKey) {
+    await canvasRemoveBg(id, imgUrl, product);
+    return;
+  }
+
+  try {
+    const resp = await fetch('https://api.ai-engine.net/v1/background-removal', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: imgUrl })
+    });
+
+    if (!resp.ok) throw new Error(`AI Engine: ${resp.status}`);
+    const json = await resp.json();
+    // AI Engine returns base64 or URL depending on plan
+    if (json.image_url) {
+      const imgResp = await fetch(json.image_url);
+      const blob = await imgResp.blob();
+      product.nobgDataUrl = await blobToDataUrl(blob);
+    } else if (json.image_base64) {
+      product.nobgDataUrl = `data:image/png;base64,${json.image_base64}`;
+    } else {
+      throw new Error('Unexpected AI Engine response format');
+    }
+    showCardNobg(id, product.nobgDataUrl);
+  } catch (e) {
+    console.warn('AI Engine failed, canvas fallback:', e.message);
+    await canvasRemoveBg(id, imgUrl, product);
+  }
+}
+
+async function canvasRemoveBg(id, imgUrl, product) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const data = imageData.data;
+      const w = canvas.width, h = canvas.height;
+
+      // Sample background from corners + edges
+      const samples = [
+        [0,0],[w-1,0],[0,h-1],[w-1,h-1],
+        [Math.floor(w/4),0],[Math.floor(3*w/4),0],
+        [Math.floor(w/4),h-1],[Math.floor(3*w/4),h-1],
+        [0,Math.floor(h/4)],[0,Math.floor(3*h/4)],
+        [w-1,Math.floor(h/4)],[w-1,Math.floor(3*h/4)],
+      ];
+      let rS=0,gS=0,bS=0;
+      samples.forEach(([x,y]) => {
+        const i=(y*w+x)*4;
+        rS+=data[i];gS+=data[i+1];bS+=data[i+2];
+      });
+      const bgR=rS/samples.length, bgG=gS/samples.length, bgB=bS/samples.length;
+      const threshold=35;
+
+      for (let i=0;i<data.length;i+=4) {
+        const dr=Math.abs(data[i]-bgR), dg=Math.abs(data[i+1]-bgG), db=Math.abs(data[i+2]-bgB);
+        if (dr<threshold&&dg<threshold&&db<threshold) data[i+3]=0;
+      }
+      ctx.putImageData(imageData,0,0);
+
+      product.nobgDataUrl = canvas.toDataURL('image/png');
+      showCardNobg(id, product.nobgDataUrl);
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = imgUrl;
+  });
+}
+
+function blobToDataUrl(blob) {
+  return new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.readAsDataURL(blob);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// GENERATE DESCRIPTION (per product)
+// ═══════════════════════════════════════════════════════════
+async function generateDesc(id, product) {
+  const orKey = document.getElementById('orKey').value.trim();
+  if (!orKey) {
+    // Use template
+    product.desc = generateTemplateDesc(product);
+    updateCardDesc(id, product.desc);
+    return;
+  }
+
+  const model = document.getElementById('modelSelect').value;
+  const prompt = `Ты пишешь краткое описание товара для карточки поста ВКонтакте.
+
+Товар: ${product.name}
+Бренд: ${product.brand || 'без бренда'}
+Цена: ${product.price ? product.price + ' ₽' : 'уточнить'}
+Рейтинг: ${product.rating}/5 (${product.reviews} отзывов)
+
+Напиши 1-2 предложения (максимум 120 символов) — только польза и суть. Никаких "данный товар", "представляет собой". Пиши как живой человек. Без кавычек.`;
+
+  try {
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${orKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://gadget-studio.local',
+        'X-Title': 'Gadget Studio VK'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 150,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `OpenRouter error ${resp.status}`);
+    }
+
+    const json = await resp.json();
+    product.desc = json.choices?.[0]?.message?.content?.trim() || generateTemplateDesc(product);
+    updateCardDesc(id, product.desc);
+  } catch (e) {
+    product.desc = generateTemplateDesc(product);
+    updateCardDesc(id, product.desc);
+    console.warn('Desc gen failed:', e.message);
+  }
+}
+
+function generateTemplateDesc(p) {
+  if (!p.name) return 'Полезный гаджет с WB.';
+  const templates = [
+    `Решает повседневную задачу. Рейтинг ${p.rating}/5 — не случайно.`,
+    `Компактно, удобно, работает. Тысячи довольных покупателей.`,
+    `Нашли на WB — проверили. Рейтинг ${p.rating}/5 говорит сам за себя.`,
+  ];
+  return templates[Math.floor(Math.random() * templates.length)];
+}
+
+// ═══════════════════════════════════════════════════════════
+// GENERATE POST TEXT
+// ═══════════════════════════════════════════════════════════
+async function generatePost() {
+  const orKey = document.getElementById('orKey').value.trim();
+  const budget = document.getElementById('budgetInput').value.trim();
+  const readyProducts = products.filter(p => p.status === 'done');
+
+  if (readyProducts.length === 0) {
+    toast('⚠️ Дождись загрузки хотя бы одного товара');
+    return;
+  }
+
+  const postZone = document.getElementById('postZone');
+  const postText = document.getElementById('postText');
+  postZone.classList.add('visible');
+  postText.innerHTML = '<div class="post-text-loader"><span class="spin">⚙️</span> Генерируем текст...</div>';
+
+  document.getElementById('genBtn').disabled = true;
+
+  const productsList = readyProducts.map((p, i) =>
+    `${i+1}. ${p.name} (${p.brand}) — ${p.price ? p.price + '₽' : 'цена не указана'}, рейтинг ${p.rating}/5`
+  ).join('\n');
+
+  const typePrompts = {
+    'подборка': `Напиши пост-подборку для VK-сообщества про полезные гаджеты с маркетплейсов.`,
+    'обзор': `Напиши пост-разбор нескольких гаджетов для VK.`,
+    'до N рублей': `Напиши пост в формате "Гаджеты до ${budget || '2000'}₽" для VK.`,
+    'проблема→решение': `Напиши пост в формате "проблема → решение" для VK.`,
+  };
+
+  const prompt = `${typePrompts[postType]}
+
+Товары:
+${productsList}
+
+Структура поста:
+1. Сильный хук-заголовок (1-2 строки) — цепляющий, без банальщины${postType === 'до N рублей' ? `, обязательно упомяни бюджет ${budget || '2000'}₽` : ''}
+2. Короткое вступление (1 строка) — о чём пост
+3. Каждый товар: название, цена, 1 строка пользы — через отступ
+4. Финальная фраза (1 строка) — вовлечение или призыв сохранить/поделиться
+5. CTA: "Ссылки и артикулы — в нашем Telegram" + 📱
+
+Правила:
+- Живой язык, для 18-30 лет
+- Эмодзи умеренно (2-4 штуки)
+- Не более 10-12 строк всего
+- Никакого пафоса и официоза
+- Не упоминай WB в начале поста`;
+
+  if (!orKey) {
+    // Template fallback
+    const text = generateTemplatePost(readyProducts, postType, budget);
+    postText.textContent = text;
+    document.getElementById('genBtn').disabled = false;
+    return;
+  }
+
+  try {
+    const model = document.getElementById('modelSelect').value;
+    const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${orKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://gadget-studio.local',
+        'X-Title': 'Gadget Studio VK'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 600,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(()=>({}));
+      throw new Error(err?.error?.message || `OpenRouter ${resp.status}`);
+    }
+
+    const json = await resp.json();
+    const text = json.choices?.[0]?.message?.content?.trim() || generateTemplatePost(readyProducts, postType, budget);
+    postText.textContent = text;
+
+  } catch (e) {
+    postText.textContent = generateTemplatePost(readyProducts, postType, budget);
+    toast('⚠️ OpenRouter недоступен — показан шаблон');
+    console.error(e);
+  }
+
+  document.getElementById('genBtn').disabled = false;
+}
+
+function generateTemplatePost(prods, type, budget) {
+  const hooks = {
+    'подборка': '🔥 Нашли штуки, которые реально меняют быт',
+    'обзор': '📦 Разбираем гаджеты — что стоит брать, а что нет',
+    'до N рублей': `💸 Гаджеты до ${budget || '2000'}₽, которые ты пожалеешь что не купил раньше`,
+    'проблема→решение': '😤 Бесят мелкие бытовые проблемы? Вот что реально помогает',
+  };
+
+  const intro = {
+    'подборка': 'Собрали лучшее с WB — всё проверено и отобрано:',
+    'обзор': 'Купили, потестили, честно рассказываем:',
+    'до N рублей': 'Без лишних слов — сохраняй и покупай:',
+    'проблема→решение': 'Простые решения для каждого:',
+  };
+
+  let text = hooks[type] + '\n\n' + intro[type] + '\n\n';
+  prods.forEach(p => {
+    text += `${p.name} — ${p.price ? p.price + '₽' : ''}`;
+    if (p.desc) text += `\n${p.desc}`;
+    text += '\n\n';
+  });
+  text += 'Сохрани, чтобы не потерять 👆\n\n📱 Ссылки и артикулы — в нашем Telegram';
+  return text;
+}
+
+// ═══════════════════════════════════════════════════════════
+// COPY POST
+// ═══════════════════════════════════════════════════════════
+function copyPost() {
+  const text = document.getElementById('postText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copyPostBtn');
+    btn.textContent = '✓ СКОПИРОВАНО';
+    btn.classList.add('copied');
+    btn.classList.remove('primary');
+    setTimeout(() => {
+      btn.textContent = 'КОПИРОВАТЬ';
+      btn.classList.remove('copied');
+      btn.classList.add('primary');
+    }, 2200);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// CARD RENDERING
+// ═══════════════════════════════════════════════════════════
+function renderCard(p) {
+  const grid = document.getElementById('productsGrid');
+  const card = document.createElement('div');
+  card.className = 'product-card';
+  card.id = `card-${p.id}`;
+  card.innerHTML = `
+    <div class="card-img" id="cardImg-${p.id}">
+      <div class="loading-overlay" id="cardLoader-${p.id}">
+        <div class="spin" style="font-size:24px">⚙️</div>
+        <div class="step-label" id="cardStep-${p.id}">Загружаем...</div>
+      </div>
+    </div>
+    <div class="card-status loading" id="cardStatus-${p.id}">Загрузка</div>
+    <button class="card-remove" onclick="removeProduct(${p.id})" title="Удалить">×</button>
+    <div class="card-body">
+      <div class="card-brand" id="cardBrand-${p.id}">Артикул ${p.article}</div>
+      <div class="card-name" id="cardName-${p.id}">Поиск товара...</div>
+      <div class="card-price" id="cardPrice-${p.id}">—</div>
+      <div class="card-rating"><span class="stars" id="cardStars-${p.id}">—</span><span id="cardReviews-${p.id}"></span></div>
+      <div class="card-desc loading-text" id="cardDesc-${p.id}">Генерируем описание...</div>
+    </div>
+    <div class="card-actions">
+      <button class="card-act-btn" onclick="downloadNobg(${p.id})">⬇ PNG без фона</button>
+      <button class="card-act-btn" onclick="regenDesc(${p.id})">↺ Описание</button>
+    </div>
+  `;
+  // Remove empty state and insert card
+  const empty = document.getElementById('emptyState');
+  if (empty.style.display !== 'none' && grid.contains(empty)) {
+    grid.innerHTML = '';
+  }
+  grid.appendChild(card);
+}
+
+function loadCardImage(id, url) {
+  return new Promise(resolve => {
+    const container = document.getElementById(`cardImg-${id}`);
+    const img = document.createElement('img');
+    img.onload = () => {
+      const loader = document.getElementById(`cardLoader-${id}`);
+      if (loader) loader.style.display = 'none';
+      container.appendChild(img);
+      resolve();
+    };
+    img.onerror = () => resolve();
+    img.src = url;
+    img.id = `origImg-${id}`;
+    img.style.display = 'block';
+  });
+}
+
+function showCardNobg(id, dataUrl) {
+  const container = document.getElementById(`cardImg-${id}`);
+  if (!container) return;
+
+  // Add toggle buttons if not exist
+  if (!container.querySelector('.img-toggle')) {
+    const toggle = document.createElement('div');
+    toggle.className = 'img-toggle';
+    toggle.innerHTML = `
+      <button class="img-tog-btn active" onclick="toggleCardImg(${id},'orig',this)">Фото</button>
+      <button class="img-tog-btn" onclick="toggleCardImg(${id},'nobg',this)">Без фона</button>
+    `;
+    container.appendChild(toggle);
+  }
+
+  // Add nobg image
+  const existing = container.querySelector(`#nobgImg-${id}`);
+  if (!existing) {
+    const nobgImg = document.createElement('img');
+    nobgImg.id = `nobgImg-${id}`;
+    nobgImg.src = dataUrl;
+    nobgImg.style.display = 'none';
+    nobgImg.style.position = 'absolute';
+    nobgImg.style.inset = '0';
+    nobgImg.style.width = '100%';
+    nobgImg.style.height = '100%';
+    nobgImg.style.objectFit = 'contain';
+    container.appendChild(nobgImg);
+  }
+}
+
+function toggleCardImg(id, mode, btn) {
+  document.querySelectorAll(`#card-${id} .img-tog-btn`).forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const orig = document.getElementById(`origImg-${id}`);
+  const nobg = document.getElementById(`nobgImg-${id}`);
+  if (orig) orig.style.display = mode === 'orig' ? 'block' : 'none';
+  if (nobg) nobg.style.display = mode === 'nobg' ? 'block' : 'none';
+}
+
+function updateCardStatus(id, state, label) {
+  const el = document.getElementById(`cardStatus-${id}`);
+  const step = document.getElementById(`cardStep-${id}`);
+  if (el) { el.className = `card-status ${state}`; el.textContent = label; }
+  if (step) step.textContent = label;
+}
+
+function updateCardMeta(id, p) {
+  const brand = document.getElementById(`cardBrand-${id}`);
+  const name = document.getElementById(`cardName-${id}`);
+  const price = document.getElementById(`cardPrice-${id}`);
+  const stars = document.getElementById(`cardStars-${id}`);
+  const reviews = document.getElementById(`cardReviews-${id}`);
+  if (brand) brand.textContent = p.brand || `Арт. ${p.article}`;
+  if (name) name.textContent = p.name;
+  if (price) price.textContent = p.price ? `${p.price.toLocaleString('ru')} ₽` : '—';
+  if (stars) stars.textContent = p.rating ? '★'.repeat(Math.round(p.rating)) + '☆'.repeat(5-Math.round(p.rating)) : '—';
+  if (reviews) reviews.textContent = p.reviews ? `${p.reviews.toLocaleString('ru')} отзывов` : '';
+}
+
+function updateCardDesc(id, desc) {
+  const el = document.getElementById(`cardDesc-${id}`);
+  if (el) { el.textContent = desc; el.classList.remove('loading-text'); }
+}
+
+// ═══════════════════════════════════════════════════════════
+// PRODUCT ACTIONS
+// ═══════════════════════════════════════════════════════════
+function removeProduct(id) {
+  products = products.filter(p => p.id !== id);
+  const card = document.getElementById(`card-${id}`);
+  if (card) card.remove();
+
+  const grid = document.getElementById('productsGrid');
+  if (products.length === 0) {
+    grid.innerHTML = `<div class="empty-state" id="emptyState">
+      <div class="empty-icon">📦</div>
+      <div class="empty-title">Нет товаров</div>
+      <div class="empty-sub">Введи артикул WB выше — инструмент сам найдёт товар, уберёт фон и напишет описание.</div>
+    </div>`;
+    document.getElementById('postZone').classList.remove('visible');
+  }
+  updateStats();
+}
+
+async function regenDesc(id) {
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const el = document.getElementById(`cardDesc-${id}`);
+  if (el) { el.textContent = 'Генерируем...'; el.classList.add('loading-text'); }
+  await generateDesc(id, p);
+}
+
+function downloadNobg(id) {
+  const p = products.find(x => x.id === id);
+  if (!p || !p.nobgDataUrl) { toast('⚠️ Фото без фона ещё не готово'); return; }
+  const a = document.createElement('a');
+  a.href = p.nobgDataUrl;
+  a.download = `wb_${p.article}_nobg.png`;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+document.getElementById('articleInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addProduct();
+});
+
+// Load saved keys
+const savedOrKey = localStorage.getItem('orKey');
+const savedAiKey = localStorage.getItem('aiEngineKey');
+const savedBgMode = localStorage.getItem('bgMode') || 'local';
+if (savedOrKey) document.getElementById('orKey').value = savedOrKey;
+if (savedAiKey) document.getElementById('aiEngineKey').value = savedAiKey;
+document.getElementById('bgMode').value = savedBgMode;
+updateBgMode();
+
+// Save keys on change
+document.getElementById('orKey').addEventListener('change', e => localStorage.setItem('orKey', e.target.value));
+document.getElementById('aiEngineKey').addEventListener('change', e => localStorage.setItem('aiEngineKey', e.target.value));
+
+updateStats();
+</script>
+</body>
+</html>
